@@ -82,7 +82,7 @@ Herramienta (venv reutilizable): `/tmp/opencode/pptxenv` · imágenes crudas: `/
 | Archivo | Descripción |
 |---|---|
 | `index.html` | Página completa (semántico, accesible, 11 secciones) |
-| `styles.css` | Sistema de diseño completo, responsive (≤1024/960/720px), `prefers-reduced-motion` |
+| `styles.css` | Sistema de diseño completo, responsive (320–1920px + horizontal), `prefers-reduced-motion` |
 | `script.js` | Año dinámico, header al scroll, menú móvil, barra de progreso (`scaleX`), reveal, nav activo, back-to-top |
 | `assets/img/ave-color.png` | Logo nuevo del ave a color, fondo transparente, 1024×1024 |
 | `assets/img/ave-luz.png` | Variante para fondos oscuros: contorno petróleo recolorado a aqua `#90E8EA` |
@@ -292,6 +292,52 @@ Los cinco contextos son oscuros, así que se usó `ave-luz.png` en todos y se in
 1. `feat: nuevo logo del ave (ave-color y ave-luz)`
 2. `style: favicons regenerados desde el nuevo logo`
 3. `style: ajuste de proporciones de marcas del ave`
+
+## 13. Adaptación responsive integral (02 de noviembre de 2026)
+
+Se adaptó todo el sitio de 320 px a 1920 px, incluido móvil horizontal, sin cambiar textos, paleta ni identidad visual. La estrategia fue fluida primero (`clamp()`) y mobile-first donde el layout lo permitía, evitando `overflow-x: hidden` como parche.
+
+### Breakpoints y comportamiento
+
+| Rango | Comportamiento principal |
+|---|---|
+| 320–374 px | Ajustes finos de header, titular y tarjetas de contacto; sin desbordes |
+| 375–480 px | Botones de hero y proyecto a ancho completo; cita y logo mini reducidos |
+| 481–767 px | Una columna en grids, secciones a 4.5rem, footer apilado y enlaces de 44 px |
+| 768–959 px | Dos columnas en grids; menú móvil con hamburguesa; footer táctil |
+| 960–1023 px | Navegación horizontal de escritorio; grids a dos columnas |
+| 1024–1199 px | Valores a tres columnas; resto conserva tres columnas |
+| 1200–1439 px | Valores a cinco columnas; layout de escritorio completo |
+| 1440 px+ | Contenedores de lectura algo más amplios, sin perder la medida editorial |
+| `max-height: 500px` + landscape | Hero compacto, ave reducida, menú desplazable y sin solaparse con el header |
+
+### Cambios aplicados
+
+- **Tipografía y espaciado fluidos:** tokens `--gutter` y `--section-y`; `clamp()` en títulos, párrafos, hero, CTA y paddings de tarjetas. `overflow-wrap: anywhere` para correos y palabras largas.
+- **Grids:** misión/visión, enfoque, proyectos y contexto con `repeat(auto-fit, minmax(min(100%, 280px), 1fr))`; valores a 5/3/2/1 columnas; estadísticas, hechos y fotos de alianzas a 4/2/1; timeline y bloques imagen/texto apilados en móvil.
+- **Menú móvil accesible:** hamburguesa con `aria-controls`, `aria-expanded`, `aria-label` dinámico e `inert` cuando está cerrado. Cierra con `Esc`, clic fuera o al elegir un enlace; bloquea el scroll del `body`, devuelve el foco al botón y se sincroniza al cambiar de viewport. Enlaces con altura mínima de 44 px.
+- **Hero y safe areas:** `min-height: 100vh` con mejora a `100svh`, `viewport-fit=cover`, padding con `env(safe-area-inset-*)` en header, hero, CTA y footer. El ave no genera scroll y el layout horizontal usa una variante compacta.
+- **Imágenes:** `width`/`height` reales en todas las imágenes, `loading="lazy"` fuera del hero, `decoding="async"`, `max-width: 100%`, `height: auto` y `aspect-ratio` en medios para evitar saltos de layout.
+- **Interacción:** hovers solo bajo `@media (hover: hover) and (pointer: fine)`; `:focus-visible` conservado; botones y enlaces táctiles de al menos 44 px; marquesina y animaciones respetan `prefers-reduced-motion`.
+- **Metadatos:** `theme-color` ya existía con `#02222d`; se añadió `viewport-fit=cover` al viewport.
+
+### Verificación con Playwright
+
+Viewports probados: `320×640`, `375×667`, `414×896`, `768×1024`, `1024×768`, `1366×768`, `1920×1080` y `812×375` (landscape). En cada uno se comprobó:
+
+- `document.documentElement.scrollWidth <= window.innerWidth`: **sin scroll horizontal** en los 8 viewports.
+- **0 errores de consola, 0 peticiones fallidas y 0 respuestas ≥400**.
+- **0 elementos desbordados** fuera de contenedores con recorte intencional.
+- Prueba adicional con texto al **200 %** en los 8 viewports: sin scroll horizontal ni desbordes.
+- Menú móvil probado en 320, 375, 414, 768 y 812 px: abre, bloquea scroll, enfoca el primer enlace, cierra con `Esc` y devuelve el foco al botón.
+- Capturas completas: `capturas/responsive/<viewport>.png` y `capturas/responsive/<viewport>-text200.png` (no versionadas).
+
+### Commits
+
+1. `style(responsive): tipografía fluida, grids y layout adaptable`
+2. `feat(nav): menú móvil accesible`
+3. `perf: imágenes con dimensiones y carga diferida`
+4. `docs: bitácora de adaptación responsive`
 
 ---
 *Bitácora interna de desarrollo — Fundación Cultural Sankofa.*
