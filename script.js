@@ -28,19 +28,72 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---- menú móvil ---- */
   const navToggle = document.getElementById('navToggle');
   const mainNav = document.getElementById('mainNav');
+  const navQuery = window.matchMedia('(max-width: 959px)');
+  let menuOpen = false;
 
-  const setMenu = (open) => {
+  const setMenu = (open, { returnFocus = false } = {}) => {
+    menuOpen = open;
     mainNav.classList.toggle('is-open', open);
+    navToggle.classList.toggle('is-open', open);
     navToggle.setAttribute('aria-expanded', String(open));
+    navToggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+    document.body.classList.toggle('nav-open', open);
+
+    if (navQuery.matches) {
+      if (open) {
+        mainNav.removeAttribute('inert');
+        const firstLink = mainNav.querySelector('a');
+        if (firstLink) firstLink.focus({ preventScroll: true });
+      } else {
+        mainNav.setAttribute('inert', '');
+      }
+    } else {
+      mainNav.removeAttribute('inert');
+    }
+
+    if (returnFocus) navToggle.focus({ preventScroll: true });
   };
 
+  const syncMenuWithViewport = () => {
+    if (!navQuery.matches && menuOpen) {
+      setMenu(false);
+      return;
+    }
+    if (navQuery.matches && !menuOpen) {
+      mainNav.setAttribute('inert', '');
+    } else {
+      mainNav.removeAttribute('inert');
+    }
+  };
+
+  syncMenuWithViewport();
+
   navToggle.addEventListener('click', () => {
-    setMenu(!mainNav.classList.contains('is-open'));
+    setMenu(!menuOpen);
   });
 
   mainNav.querySelectorAll('a').forEach((link) => {
     link.addEventListener('click', () => setMenu(false));
   });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && menuOpen) {
+      setMenu(false, { returnFocus: true });
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!menuOpen || !navQuery.matches) return;
+    if (!mainNav.contains(event.target) && !navToggle.contains(event.target)) {
+      setMenu(false);
+    }
+  });
+
+  if (typeof navQuery.addEventListener === 'function') {
+    navQuery.addEventListener('change', syncMenuWithViewport);
+  } else {
+    navQuery.addListener(syncMenuWithViewport);
+  }
 
   /* ---- botón volver arriba ---- */
   const backToTop = document.getElementById('backToTop');
