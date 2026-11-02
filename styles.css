@@ -154,10 +154,10 @@ em { font-style: italic; }
 .brand-mark {
   width: 2.2rem;
   height: 2.2rem;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
   align-self: center;
   flex: none;
-  filter: invert(1) brightness(1.15);
-  transition: filter 0.4s var(--ease);
 }
 
 .brand-sub {
@@ -367,6 +367,8 @@ em { font-style: italic; }
 .bird-mark {
   width: 34%;
   height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
   opacity: 0.85;
   animation: bird-breathe 7s ease-in-out infinite;
 }
@@ -600,7 +602,7 @@ em { font-style: italic; }
   border-radius: 50%;
   padding: 0.45rem;
 }
-.bird-mini img { width: 100%; }
+.bird-mini img { width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: contain; }
 .quote-rule blockquote {
   margin: 0;
   font-family: var(--font-display);
@@ -1126,7 +1128,8 @@ em { font-style: italic; }
   max-width: 50ch;
   font-size: 1.06rem;
 }
-.bird-mark-lg { margin-top: 2.6rem; width: 5.5rem; opacity: 0.9; }
+.bird-mark-lg { margin-top: 2.6rem; width: 5.5rem; aspect-ratio: 1 / 1; object-fit: contain; opacity: 0.9; }
+.bird-mark-lg img { width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: contain; }
 
 .contact-card {
   background: rgba(250, 246, 234, 0.05);

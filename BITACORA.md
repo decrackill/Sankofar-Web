@@ -84,9 +84,10 @@ Herramienta (venv reutilizable): `/tmp/opencode/pptxenv` · imágenes crudas: `/
 | `index.html` | Página completa (semántico, accesible, 11 secciones) |
 | `styles.css` | Sistema de diseño completo, responsive (≤1024/960/720px), `prefers-reduced-motion` |
 | `script.js` | Año dinámico, header al scroll, menú móvil, barra de progreso (`scaleX`), reveal, nav activo, back-to-top |
-| `assets/img/logo.png` | Logo (ave Sankofa) a fondo transparente, 676×754 |
-| `assets/img/logo-luz.png` | Variante clara para fondos oscuros |
-| `assets/img/favicon.png` / `favicon-180.png` | Favicons |
+| `assets/img/ave-color.png` | Logo nuevo del ave a color, fondo transparente, 1024×1024 |
+| `assets/img/ave-luz.png` | Variante para fondos oscuros: contorno petróleo recolorado a aqua `#90E8EA` |
+| `assets/img/favicon.png` / `favicon-32.png` | Favicons regenerados desde `ave-color.png` (180 y 32 px) |
+| `assets/img/_old/logo.png` · `_old/logo-luz.png` | Logos anteriores archivados, sin referencias en el sitio |
 | `assets/img/*.jpg` | 10 imágenes optimizadas (territorio, proyectos, alianzas, revista) |
 
 ## 7. Control de calidad
@@ -237,6 +238,60 @@ Se alineó el color del sitio con los valores muestreados del logo PNG oficial. 
 - Capturas: `capturas/paleta-desktop.png` (1440 px) y `capturas/paleta-mobile.png` (390 px).
 - Grep final de los hex antiguos del paso 2: sin coincidencias en `index.html`, `styles.css` ni `script.js`.
 - Contraste AA comprobado en los pares principales: texto `--ink` / `--pine-900` 14.46:1; `--gold-soft` / `--pine-900` 11.84:1; `--clay-soft` / `--pine-900` 7.44:1; `--aqua` / `--pine-900` 11.75:1; `--pine-900` / coral 5.38:1.
+
+## 12. Nuevo logo del ave (02 de noviembre de 2026)
+
+Se reemplazaron los logos anteriores por el nuevo logo oficial del ave a partir de `sankofar-ave.png` (1024×1024, fondo transparente). No se cambiaron layout, textos ni estilos salvo las proporciones y el filtro necesario para mostrar correctamente la nueva marca.
+
+### Assets generados
+
+| Archivo | Origen / proceso | Resultado |
+|---|---|---|
+| `assets/img/ave-color.png` | Copia directa de `sankofar-ave.png` | 1024×1024 RGBA, fondo transparente |
+| `assets/img/ave-luz.png` | Recolor de píxeles cercanos a `#044054` (tolerancia euclidiana 40) a `#90E8EA`, conservando alfa | 65 622 píxeles recoloreados; dorado, coral y turquesa intactos |
+| `assets/img/favicon.png` | Recorte al contenido + padding 8 %, lienzo cuadrado transparente, Lanczos | 180×180 |
+| `assets/img/favicon-32.png` | Mismo recorte, Lanczos | 32×32 |
+| `assets/img/_old/logo.png` · `_old/logo-luz.png` | Logos anteriores archivados (no borrados) | Sin referencias en el sitio |
+
+Verificación de `ave-luz.png` sobre `#02222d`: el contorno aqua queda visible (contraste 11.75:1) y el canal alfa se conserva sin diferencias.
+
+### Referencias en `index.html`
+
+| Línea | Antes | Después | Fondo del contexto |
+|---|---|---|---|
+| 23 | `assets/img/logo.png` | `assets/img/ave-luz.png` | Oscuro (navbar sobre hero) |
+| 55 | `assets/img/logo-luz.png` | `assets/img/ave-luz.png` | Oscuro (hero) |
+| 154 | `assets/img/logo.png` | `assets/img/ave-luz.png` | Oscuro (tarjeta manifiesto) |
+| 524 | `assets/img/logo-luz.png` | `assets/img/ave-luz.png` | Oscuro (CTA) |
+| 562 | `assets/img/logo-luz.png` | `assets/img/ave-luz.png` | Oscuro (footer) |
+
+Los cinco contextos son oscuros, así que se usó `ave-luz.png` en todos y se invirtió el mapeo propuesto para L23 y L154. También se retiró `filter: invert(1) brightness(1.15)` de `.brand-mark`, porque invertía los colores oficiales del nuevo logo.
+
+### Proporciones en `styles.css`
+
+| Regla · línea(s) | Antes | Después |
+|---|---|---|
+| `.brand-mark` · 154-161 | `filter: invert(1) brightness(1.15)` | Sin filtro; `aspect-ratio: 1 / 1` + `object-fit: contain` (2.2×2.2 rem) |
+| `.bird-mark` · 367-374 | `width: 34%; height: auto` | Añadido `aspect-ratio: 1 / 1` + `object-fit: contain` |
+| `.bird-mini img` · 605 | `width: 100%` | Añadido `height: auto` + `aspect-ratio: 1 / 1` + `object-fit: contain` |
+| `.bird-mark-lg` · 1131-1132 | `width: 5.5rem` | Añadido `aspect-ratio: 1 / 1` + `object-fit: contain`; nueva regla `img` al 100 % |
+
+### Verificación
+
+- Render headless Chromium/Playwright en desktop (1440 px) y móvil (390 px): **0 errores de consola, 0 peticiones fallidas, 0 respuestas ≥400**.
+- Las cinco instancias cargan `ave-luz.png` (natural 1024×1024) y se renderizan en proporción 1:1: navbar 35.19 px, hero 163.19/114.03 px, tarjeta 38.02 px, sección grande 88 px, footer 32 px.
+- Favicons: 180×180 y 32×32, fondo transparente.
+- Grep: sin referencias a `logo.png` ni `logo-luz.png` en `index.html`, `styles.css` ni `script.js`.
+- Capturas:
+  - `capturas/logo/logo-desktop.png`
+  - `capturas/logo/logo-mobile.png`
+  - Recortes: `capturas/logo/logo-navbar.png`, `logo-hero.png`, `logo-card.png`, `logo-large.png`, `logo-footer.png`
+
+### Commits
+
+1. `feat: nuevo logo del ave (ave-color y ave-luz)`
+2. `style: favicons regenerados desde el nuevo logo`
+3. `style: ajuste de proporciones de marcas del ave`
 
 ---
 *Bitácora interna de desarrollo — Fundación Cultural Sankofa.*
